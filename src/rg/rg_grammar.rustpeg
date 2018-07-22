@@ -1,0 +1,80 @@
+use rg::values::*;
+
+pub file
+    = instance*
+
+pub instance -> RgNode
+    = _ class:$(roblox_class_name) _ name:(string_literal?) _ '{' decls:( (prop_assignment / instance)* ) '}'
+        {
+            let mut props: Vec<RgProperty> = vec![];
+            let mut instances: Vec<RgInstance> = vec![];
+
+            for dec in decls {
+                match dec {
+                    RgNode::Property(prop) => props.push(prop),
+                    RgNode::Instance(inst) => instances.push(inst)
+                }
+            }
+
+            if let Some(name_lit) = name {
+                props.push(RgProperty::new("Name".to_owned(), name_lit));
+            }
+
+            RgNode::Instance(RgInstance::new(props, instances))
+        }
+
+pub prop_assignment -> RgNode
+    = _ name:$(property_name) _ ':' _ value:expression _ { RgNode::Property(RgProperty::new(name.to_owned(), value)) }
+
+// Identifiers
+roblox_class_name = [a-zA-Z]+
+property_name = [a-zA-Z0-9]+
+
+// Expression
+expression -> Value
+    = _ v:( hex_color / rgb_color / boolean / number / string_literal ) _ { v }
+
+// Color Parsing
+hex_digit = [0-9A-F]
+pub hex_color -> Value
+    = '#' c:$(hex_digit*<6>) { Value::new_hex_color(c) }
+
+rgb_arg -> i64
+    = _ s:$([0-9]*<1,3>) _ { s.parse().unwrap() }
+
+pub rgb_color -> Value
+    = "RGB" _ '(' rgb:(rgb_arg**<3> ",") _ ')' _ { Value::new_rgb_col(rgb) }
+
+// UDim2
+udim2_arg -> f64
+    = _ v:number_literal _ { v }
+
+pub udim2 -> Value
+    = _ "UDim2" _ '(' _ nums:(udim2_arg**<4> ",") _ ')' _ { Value::new_udim2(nums) }
+
+// Boolean Parsing
+pub boolean -> Value
+    = b:$("true" / "false") { Value::new_boolean(b) }
+
+// String Parsing.
+
+double_quote = '"'
+escaped_character = '\\' ( double_quote / "'" / "\\" / [abfnrtv] )
+string_contents -> &'input str = $(escaped_character / !double_quote .)*
+
+pub string_literal -> Value
+    = double_quote c:string_contents double_quote { Value::new_string(c) }
+
+// Nummber Parsing
+pub number -> Value
+    = e:number_literal { Value::new_number(e) }
+
+number_literal -> f64
+    = e:$(sign? digits ('.' digits)?) { e.parse::<f64>().unwrap() }
+sign = '+' / '-'
+digits -> &'input str
+    = $([0-9]+)
+
+_ = #quiet<(whitespace*)>
+whitespace
+= [ \t\u{00A0}\u{FEFF}\u{1680}\u{180E}\u{2000}-\u{200A}\u{202F}\u{205F}\u{3000}\n]

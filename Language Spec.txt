@@ -1,0 +1,30 @@
+The purpose of this language is to streamline the procedure of making ROBLOX Guis.
+Inspiration has been taking from HTML-CSS ways of designing web pages.
+
+There are 2 types of files, .rgss and .rg. 
+.rg files is where you specify the physical structure of the gui (can also include styles as well) [Similar to HTML files]
+.rgss files allow you to store style code such that it can be used in multiple rg files. [Similar to CSS files]
+
+RG Files
+--------
+
+RG Files are where you specify the hierachy (what you see in the explorer) of a gui. 
+For example, let's say you wanted to have a simple text "Welcome to the game" label 
+with a button that says continue.
+
+Syntax of RG Files (in a kinda peg grammar)
+
+Instance <- ClassName InstanceName? '{' (PropertyAssignemnt / Instance)* '}'
+PropertyAssignemnt <- Property ':' Value
+Property <- property an instance has
+Value <- Color / Boolean / Number / String
+Color <- HexColor / RgbColor
+HexColor <- '#'[0-9A-F]{6}
+RgbColor <- RGB([0-255], [0-255], [0-255])
+ClassName <- Name of a ROBLOX Class 
+InstanceName <- Name of the instance (.Name property)
+
+RGSS Files
+----------
+
+Aren't they implemented.
