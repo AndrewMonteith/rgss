@@ -11,19 +11,6 @@ pub fn parse_str(contents: &str) -> Result<RgNode, ParseError> {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 #[cfg(test)]
 mod can_parse {
     use rg::values::{Value, RgProperty as Property, RgNode};
@@ -243,27 +230,40 @@ mod can_parse {
 
     mod code_fragments {
         use super::*;
-        use roblox;
 
         macro_rules! should_compile {
             ($test_name: ident, $contents: expr) => {
                 #[test]
                 fn $test_name() {
-                    if let Ok(api) = roblox::initalise() {
-                        let parsed = atoms::file($contents);
+                    let parsed = atoms::file($contents);
 
-                        if !parsed.is_ok() {
-                            panic!(format!("Expected success but got {:?}", parsed));
-                        }
+                    if !parsed.is_ok() {
+                        panic!(format!("Expected success but got {:?}", parsed));
                     }
                 }
             }
         }
 
         should_compile!(empty_instance, "Instance {}");
-        should_compile!(nested_empty, "Instance { Instance {} }");
+        should_compile!(nested_empty, "Instance {Instance{}}");
+        should_compile!(welcome_gui, r#"ScreenGui {
+    Name: "WelcomeGui"
+    Enabled: true
 
+    TextLabel {
+        Text: "Welcome"
+        BackgroundColor3: #FF00FF
+        TextStrokeTransparency: 0.2
+        BorderSizePixel: 0
+    }
 
+    TextButton "Continue" {
+        Text: "Continue"
+        BackgroundTransparency: 1
+        TextColor3: RGB(255, 20, 120)
+    }
 
+    Frame{}
+}"#);
     }
 }

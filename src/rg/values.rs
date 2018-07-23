@@ -38,37 +38,7 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn new_string(s: &str) -> Value {
-        Value::StringLiteral(s.to_owned())
-    }
-
-    pub fn new_number(f: f64) -> Value {
-        Value::Number(f)
-    }
-
-    pub fn new_boolean(s: &str) -> Value {
-        Value::Boolean(s == "true")
-    }
-
-    pub fn new_hex_color(s: &str) -> Value {
-        let rgb = s.chars()
-            .collect::<Vec<char>>()
-            .chunks(2)
-            .map(|v: &[char]| i64::from_str_radix(v.iter().collect::<String>().as_ref(), 16).unwrap())
-            .collect::<Vec<i64>>();
-
-        return Value::new_rgb_col(rgb);
-    }
-
-    pub fn new_rgb_col(v: Vec<i64>) -> Value {
-        Value::Color(v[0], v[1], v[2])
-    }
-
-    pub fn new_udim2(v: Vec<f64>) -> Value {
-        Value::UDim2(v[0], v[1], v[2], v[3])
-    }
-
-    pub fn get_type(&self) -> &'static str {
+   pub fn get_type(&self) -> &'static str {
         match self {
             Value::StringLiteral(_) => "String",
             Value::Number(_) => "Number",

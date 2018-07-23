@@ -1,10 +1,10 @@
 use rg::values::*;
 
 pub file
-    = instance*
+    = _ instance* _
 
 pub instance -> RgNode
-    = _ class:$(roblox_class_name) _ name:(string_literal?) _ '{' decls:( (prop_assignment / instance)* ) '}'
+    = _ class:$(roblox_class_name) _ name:(string_literal?) _ '{' _ decls:( (prop_assignment / instance)* ) _    '}'
         {
             let mut props: Vec<RgProperty> = vec![];
             let mut instances: Vec<RgInstance> = vec![];
@@ -37,24 +37,39 @@ expression -> Value
 // Color Parsing
 hex_digit = [0-9A-F]
 pub hex_color -> Value
-    = '#' c:$(hex_digit*<6>) { Value::new_hex_color(c) }
+    = '#' c:$(hex_digit*<6>) 
+    {
+        let rgb = c.chars()
+            .collect::<Vec<char>>()
+            .chunks(2)
+            .map(|v: &[char]| i64::from_str_radix(v.iter().collect::<String>().as_ref(), 16).unwrap())
+            .collect::<Vec<i64>>();
+
+        Value::Color(rgb[0], rgb[1], rgb[2]) 
+    }
 
 rgb_arg -> i64
     = _ s:$([0-9]*<1,3>) _ { s.parse().unwrap() }
 
 pub rgb_color -> Value
-    = "RGB" _ '(' rgb:(rgb_arg**<3> ",") _ ')' _ { Value::new_rgb_col(rgb) }
+    = "RGB" _ '(' rgb:(rgb_arg**<3> ",") _ ')' _ 
+    { 
+        Value::Color(rgb[0], rgb[1], rgb[2]) 
+    }
 
 // UDim2
 udim2_arg -> f64
     = _ v:number_literal _ { v }
 
 pub udim2 -> Value
-    = _ "UDim2" _ '(' _ nums:(udim2_arg**<4> ",") _ ')' _ { Value::new_udim2(nums) }
+    = _ "UDim2" _ '(' _ nums:(udim2_arg**<4> ",") _ ')' _ 
+    { 
+        Value::UDim2(nums[0], nums[1], nums[2], nums[3]) 
+    }
 
 // Boolean Parsing
 pub boolean -> Value
-    = b:$("true" / "false") { Value::new_boolean(b) }
+    = b:$("true" / "false") { Value::Boolean(b == "true") }
 
 // String Parsing.
 
@@ -63,11 +78,11 @@ escaped_character = '\\' ( double_quote / "'" / "\\" / [abfnrtv] )
 string_contents -> &'input str = $(escaped_character / !double_quote .)*
 
 pub string_literal -> Value
-    = double_quote c:string_contents double_quote { Value::new_string(c) }
+    = double_quote c:string_contents double_quote { Value::StringLiteral(c.to_owned()) }
 
 // Nummber Parsing
 pub number -> Value
-    = e:number_literal { Value::new_number(e) }
+    = e:number_literal { Value::Number(e) }
 
 number_literal -> f64
     = e:$(sign? digits ('.' digits)?) { e.parse::<f64>().unwrap() }
