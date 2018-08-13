@@ -1,4 +1,5 @@
 pub mod parser;
-mod values;
+pub mod values;
+mod semantics;
 
 pub use self::values::Value;

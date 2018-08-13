@@ -51,7 +51,7 @@ fn parse_property(api: &mut RobloxApi, prop: &Value) {
 
     let class = as_str!(get!(prop, "Class"));
 
-    api.get_instance(class).unwrap().add_property(
+    api.get_instance_mut(class).unwrap().add_property(
         Property::new(name, tags, val_type)
     )
 }
@@ -66,7 +66,7 @@ fn parse_enum(api: &mut RobloxApi, enm: &Value) {
 fn parse_enum_item(api: &mut RobloxApi, member: &Value) {
     let belongs_to = as_str!(get!(member, "Enum"));
 
-    api.get_enum(belongs_to).unwrap()
+    api.get_enum_mut(belongs_to).unwrap()
         .add_member(own_str!(member, "Name"));
 }
 

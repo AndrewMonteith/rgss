@@ -2,14 +2,29 @@ mod atoms {
     include!(concat!(env!("OUT_DIR"), "./rg_grammar.rs"));
 }
 
-pub type ParseError = atoms::ParseError;
-
 use rg::values::RgNode;
+use rg::semantics::SemanticsChecker;
 
-pub fn parse_str(contents: &str) -> Result<RgNode, ParseError> {
-    atoms::instance(contents)
+pub type RgParserResult = Result<Option<Vec<RgNode>>, String>;
+
+pub const SUCCESS: RgParserResult = Ok(None);
+
+pub fn parse_str(contents: &str) -> RgParserResult {
+    let nodes = atoms::file(contents)
+        .map_err(|e| e.to_string())?;
+
+    let semantics_checker = SemanticsChecker::new()?;
+
+    for node in &nodes {
+        if let RgNode::Instance(ref inst) = node {
+            semantics_checker.check_instance(inst)?;
+        } else {
+            return Err(format!("Unexpected node encounted when parsing {:?}", node));
+        }
+    }
+
+    Ok(Some(nodes))
 }
-
 
 #[cfg(test)]
 mod can_parse {
@@ -247,23 +262,24 @@ mod can_parse {
         should_compile!(empty_instance, "Instance {}");
         should_compile!(nested_empty, "Instance {Instance{}}");
         should_compile!(welcome_gui, r#"ScreenGui {
-    Name: "WelcomeGui"
-    Enabled: true
+                                        Name: "WelcomeGui"
+                                        Enabled: true
 
-    TextLabel {
-        Text: "Welcome"
-        BackgroundColor3: #FF00FF
-        TextStrokeTransparency: 0.2
-        BorderSizePixel: 0
-    }
+                                        TextLabel {
+                                            Text: "Welcome"
+                                            BackgroundColor3: #FF00FF
+                                            TextStrokeTransparency: 0.2
+                                            BorderSizePixel: 0
+                                        }
 
-    TextButton "Continue" {
-        Text: "Continue"
-        BackgroundTransparency: 1
-        TextColor3: RGB(255, 20, 120)
-    }
+                                        TextButton "Continue" {
+                                            Text: "Continue"
+                                            BackgroundTransparency: 1
+                                            TextColor3: RGB(255, 20, 120)
+                                        }
 
-    Frame{}
-}"#);
+                                        Frame{}
+                                    }"#);
+        
     }
 }

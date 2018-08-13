@@ -8,6 +8,7 @@ fn try_download_http() -> reqwest::Result<String> {
 
 fn get_api_dir() -> std::path::PathBuf {
     let mut cur_path = std::env::current_dir().unwrap();
+    
     cur_path.push("api.json");
 
     cur_path

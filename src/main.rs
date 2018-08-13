@@ -3,10 +3,8 @@ mod roblox;
 
 use rg::parser;
 
-fn compile_str(contents: &str) -> Result<(), parser::ParseError> {
-    let tree = parser::parse_str(contents)?;
-
-    Ok(())
+fn compile_str(contents: &str) {
+    println!("{:?}", parser::parse_str(contents));
 }
 
 fn main() {
@@ -24,14 +22,12 @@ fn main() {
     TextButton "Continue" {
         Text: "Continue"
         BackgroundTransparency: 1
+        TextXAlignment: Center
         TextColor3: RGB(255, 20, 120)
     }
 }"#;
 
-    match roblox::initalise() {
-        Ok(api) => println!("{:?}", compile_str(contents)),
-        Err(error_msg) => eprintln!("Error when loading roblox api {}", error_msg)
-    }
+    compile_str(contents);
 
 
 

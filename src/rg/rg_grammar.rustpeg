@@ -1,10 +1,10 @@
 use rg::values::*;
 
-pub file
-    = _ instance* _
+pub file -> Vec<RgNode>
+    = _ nodes:(instance*) _ { nodes }
 
 pub instance -> RgNode
-    = _ class:$(roblox_class_name) _ name:(string_literal?) _ '{' _ decls:( (prop_assignment / instance)* ) _    '}'
+    = _ class:$(roblox_class_name) _ name:(string_literal?) _ '{' _ decls:( (prop_assignment / instance)* ) _ '}' _ ';'? _
         {
             let mut props: Vec<RgProperty> = vec![];
             let mut instances: Vec<RgInstance> = vec![];
@@ -16,19 +16,23 @@ pub instance -> RgNode
                 }
             }
 
-            if let Some(name_lit) = name {
-                props.push(RgProperty::new("Name".to_owned(), name_lit));
+            if let Some(name_rg_value) = name {
+                props.push(RgProperty::new("Name".to_owned(), name_rg_value));
             }
+
+            props.push(RgProperty::new_string("_ClassName".to_owned(), class.to_owned()));
 
             RgNode::Instance(RgInstance::new(props, instances))
         }
 
 pub prop_assignment -> RgNode
-    = _ name:$(property_name) _ ':' _ value:expression _ { RgNode::Property(RgProperty::new(name.to_owned(), value)) }
+    = _ name:$(property_name) _ ':' _ value:(expression / enum_member) _ ';'? _ { RgNode::Property(RgProperty::new(name.to_owned(), value)) }
 
 // Identifiers
 roblox_class_name = [a-zA-Z]+
 property_name = [a-zA-Z0-9]+
+enum_member -> Value
+     = _ v:$(property_name) _ { Value::EnumMember(v.to_owned()) }
 
 // Expression
 expression -> Value
