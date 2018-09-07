@@ -1,10 +1,17 @@
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
+
 mod rg;
 mod roblox;
 
 use rg::parser;
 
 fn compile_str(contents: &str) {
-    println!("{:?}", parser::parse_str(contents));
+    match parser::parse_str(contents) {
+        Ok(api) => println!("{}", serde_json::to_string(&api).unwrap()),
+        Err(error) => println!("Error when compiling {}", error),
+    }
 }
 
 fn main() {

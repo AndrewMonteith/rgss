@@ -1,16 +1,17 @@
-#[derive(PartialEq, Debug)]
+
+#[derive(PartialEq, Debug, Serialize)]
 pub enum RgNode {
     Property(RgProperty),
     Instance(RgInstance),
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Serialize)]
 pub struct RgProperty {
     name: String,
     value: Value,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Serialize)]
 pub struct RgInstance {
     _properties: Vec<RgProperty>,
     _children: Vec<RgInstance>,
@@ -54,7 +55,7 @@ impl RgInstance {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Serialize)]
 pub enum Value {
     StringLiteral(String),
     Number(f64),

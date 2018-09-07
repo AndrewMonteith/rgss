@@ -2,7 +2,7 @@ mod downloader;
 mod api;
 mod parser;
 
-pub use self::api::{RobloxApi};
+pub use self::api::RobloxApi;
 
 pub fn initalise() -> Result<RobloxApi, &'static str> {
     match downloader::get_api_string() {

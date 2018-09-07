@@ -1,10 +1,11 @@
 use roblox::{RobloxApi, initalise as get_roblox_api};
 use rg::values::{RgInstance, RgProperty};
-use rg::parser::{RgParserResult, SUCCESS};
 
 pub struct SemanticsChecker {
     api: RobloxApi
 }
+
+pub type SemanticsResult = Result<(), String>;
 
 fn get_string_val<'a>(inst: &'a RgInstance, val: &'a str) -> &'a str {
     inst.get_prop_value(val).unwrap().as_str()
@@ -25,7 +26,7 @@ impl SemanticsChecker {
         Ok(SemanticsChecker { api })
     }
 
-    pub fn check_instance(&self, inst: &RgInstance) -> RgParserResult {
+    pub fn check_instance(&self, inst: &RgInstance) -> SemanticsResult {
         self.check_instance_semantics(inst)?;
 
         for prop in inst.properties() {
@@ -36,10 +37,10 @@ impl SemanticsChecker {
             self.check_instance(child)?;
         }
 
-        SUCCESS
+        Ok(())
     }
 
-    fn check_instance_semantics(&self, inst: &RgInstance) -> RgParserResult {
+    fn check_instance_semantics(&self, inst: &RgInstance) -> SemanticsResult {
         let class_name = get_string_val(inst, "_ClassName");
 
         let instance = self.api.get_instance(class_name);
@@ -54,12 +55,12 @@ impl SemanticsChecker {
             "Instance {} cannot be created",
             roblox_instance.get_name());
 
-        SUCCESS
+        Ok(())
     }
 
-    fn check_property_semantics(&self, inst: &RgInstance, prop: &RgProperty) -> RgParserResult {
+    fn check_property_semantics(&self, inst: &RgInstance, prop: &RgProperty) -> SemanticsResult {
         if prop.get_name() == "_ClassName" {
-            return SUCCESS;
+            return Ok(());
         }
 
         let roblox_instance = self.api.get_instance(
@@ -84,6 +85,6 @@ impl SemanticsChecker {
             "The property {} is readonly",
             roblox_prop.get_name());
 
-        SUCCESS
+        Ok(())
     }
 }

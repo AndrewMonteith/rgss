@@ -5,9 +5,7 @@ mod atoms {
 use rg::values::RgNode;
 use rg::semantics::SemanticsChecker;
 
-pub type RgParserResult = Result<Option<Vec<RgNode>>, String>;
-
-pub const SUCCESS: RgParserResult = Ok(None);
+pub type RgParserResult = Result<Vec<RgNode>, String>;
 
 pub fn parse_str(contents: &str) -> RgParserResult {
     let nodes = atoms::file(contents)
@@ -23,7 +21,7 @@ pub fn parse_str(contents: &str) -> RgParserResult {
         }
     }
 
-    Ok(Some(nodes))
+    Ok(nodes)
 }
 
 #[cfg(test)]
